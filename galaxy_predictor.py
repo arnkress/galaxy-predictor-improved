@@ -4,11 +4,11 @@ import joblib
 import os
 
 
-class codon_counter:
+class CodonCounter:
     def __init__(self):
-        self.table = {key: 0 for key in self.generateAllcodons()}
+        self.table = {key: 0 for key in self._generate_all_codons()}
 
-    def generateAllcodons(self):
+    def _generate_all_codons(self):
         codons = []
         for i in "ACGT":
             for j in "ACGT":
@@ -29,14 +29,14 @@ class codon_counter:
     def count_sequence(self, sequence):
         if len(sequence) == 0:
             return
-        for i in range(0, len(sequence) - 3, 1):
+        for i in range(0, len(sequence) - 2, 1):
             self.table[sequence[i : i + 3]] += 1
 
     def get_table(self):
         return self.table
 
 
-class galaxyPredictor:
+class GalaxyPredictor:
     labels = {
         0: "LOWER ARM",
         1: "CENTER",
@@ -61,13 +61,13 @@ class galaxyPredictor:
         return self.model.predict([values])
 
     def get_label(self, value):
-        return galaxyPredictor.labels[value]
+        return self.labels[value]
 
 
 if __name__ == "__main__":
-    cc = codon_counter()
-    cc.count_file("Nanobdella_aerobiophila.fasta")
+    cc = CodonCounter()
+    cc.count_file("tests/Nanobdella_aerobiophila.fasta")
     table = cc.get_table()
-    predictor = galaxyPredictor("models/archaea.pkl")
+    predictor = GalaxyPredictor("models/archaea.pkl")
     predicted_class = predictor.predict(table)[0]
     print(predicted_class, predictor.get_label(predicted_class))
