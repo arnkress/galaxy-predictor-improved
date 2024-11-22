@@ -12,4 +12,7 @@ A pre-trained model for Archaea is provided, classifying genomes into the follow
 
 ## Installation
 
-You'll need scikit-learn.
+You'll need Python 3.13. Install the dependencies with:
+  ```bash
+  pip install -r requirements.txt
+  ```
