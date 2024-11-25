@@ -10,9 +10,9 @@ class CodonCounter:
     """
 
     def __init__(self):
-        self.table = {key: 0 for key in self._generate_all_codons()}
+        self.table: dict[str, int] = {key: 0 for key in self._generate_all_codons()}
 
-    def _generate_all_codons(self):
+    def _generate_all_codons(self) -> list[str]:
         """
         Generate all possible codons
 
@@ -26,13 +26,13 @@ class CodonCounter:
                     codons.append(i + j + k)
         return codons
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the count table
         """
         self.table = {key: 0 for key in self.table.keys()}
 
-    def count_file(self, path):
+    def count_file(self, path: str) -> None:
         """
         Count codons in a FASTA file
 
@@ -42,13 +42,10 @@ class CodonCounter:
         Raises:
             FileNotFoundError: if the file is not found
         """
-        try:
-            for record in Bio.SeqIO.parse(path, "fasta"):
-                self.count_sequence(str(record.seq))
-        except FileNotFoundError:
-            print(f"Error reading file {path}")
+        for record in Bio.SeqIO.parse(path, "fasta"):
+            self.count_sequence(str(record.seq))
 
-    def count_sequence(self, sequence):
+    def count_sequence(self, sequence: str) -> None:
         """
         Count codons in a sequence
 
@@ -65,23 +62,23 @@ class CodonCounter:
 
 
 class GalaxyPredictor:
-    labels = {
+    labels: dict[int, str] = {
         0: "LOWER ARM",
         1: "CENTER",
         2: "UPPER ARM",
     }
 
     def __init__(self, model_path=None):
-        self.model_path = model_path
+        self.model_path: str = model_path
         self.model = None
 
-    def _load_model(self):
+    def _load_model(self) -> None:
         if os.path.exists(self.model_path):
             self.model = joblib.load(self.model_path)
         else:
             raise FileNotFoundError("Model not found at path: " + self.model_path)
 
-    def predict(self, toto):
+    def predict(self, table: dict[str, int]) -> int:
         """
         Predicts the galaxy region for a given input.
 
@@ -94,10 +91,10 @@ class GalaxyPredictor:
         if not self.model:
             # load the model
             self._load_model()
-        values = [toto[key] for key in sorted(toto.keys())]
+        values = [table[key] for key in sorted(table.keys())]
         return self.model.predict([values])
 
-    def get_label(self, value):
+    def get_label(self, value: int) -> str:
         """
         Get the label for a given class
 
@@ -108,12 +105,3 @@ class GalaxyPredictor:
             str: the class label
         """
         return self.labels[value]
-
-
-if __name__ == "__main__":
-    cc = CodonCounter()
-    cc.count_file("tests/Nanobdella_aerobiophila.fasta")
-    table = cc.get_table()
-    predictor = GalaxyPredictor("models/archaea.pkl")
-    predicted_class = predictor.predict(table)[0]
-    print(predicted_class, predictor.get_label(predicted_class))
