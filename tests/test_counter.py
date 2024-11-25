@@ -101,3 +101,20 @@ def test_reset():
     cc.count_sequence("ACGTACCTG")
     cc.reset()
     assert sum(cc.get_table().values()) == 0
+
+
+def test_empty_sequence():
+    cc = CodonCounter()
+    cc.count_sequence("")
+    assert sum(cc.get_table().values()) == 0
+
+
+def test_invalid_file():
+    cc = CodonCounter()
+    not_found = False
+    try:
+        cc.count_file("tests/invalid.fasta")
+    except FileNotFoundError as e:
+        print("File not found")
+        not_found = True
+    assert not_found
